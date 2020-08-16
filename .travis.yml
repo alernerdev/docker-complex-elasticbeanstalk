@@ -1,0 +1,27 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+# using Dockerfile.dev because we want to run tests
+    - docker build -t redridinghood/docker-complex-fib -f ./client/Dockerfile.dev ./client
+
+# test running section
+script:
+# the -- stuff is to make sure it doesnt sit there once tests are done running
+    - docker run -e CI=true redridinghood/docker-complex-fib npm test -- --coverage
+
+# at this point, the above dev image is no longer necessary
+# this defaults to prod normal Dockerfile
+after_success:
+    - docker build -t redridinghood/docker-complex-fib-client ./client
+    - docker build -t redridinghood/docker-complex-fib-nginx ./nginx
+    - docker build -t redridinghood/docker-complex-fib-worker ./worker
+    - docker build -t redridinghood/docker-complex-fib-server ./server
+# take the images and push them up to the hub
+# login to docker CLI. The env vars are setup in Travis
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push redridinghood/docker-complex-fib-client
+    - docker push redridinghood/docker-complex-fib-nginx
+    - docker push redridinghood/docker-complex-fib-worker
+    - docker push redridinghood/docker-complex-fib-server
