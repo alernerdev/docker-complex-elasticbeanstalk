@@ -1,0 +1,67 @@
+version: '3'
+services:
+# these are ready-made out of the box services
+    postgres:
+        image: 'postgres:latest'
+        environment:
+            - POSTGRES_PASSWORD=postgres_password
+    redis:
+        image: 'redis:latest'
+# and this is a customized container with nginx and specific config
+    nginx:
+        depends_on:
+            - api
+            - client
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./nginx
+        restart: always
+        ports:
+# local machine 3050 to container pot 80
+            - '3050:80'
+
+# thats my code
+    api:
+        depends_on: 
+            - postgres
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./server
+        volumes:
+# node_modules is not redirected back to local machine
+            - /app/node_modules
+# server directory on local machine is mapped to /app in the image
+            - ./server:/app
+
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - PGUSER=postgres
+            - PGHOST=postgres
+            - PGDATABASE=postgres
+            - PGPASSWORD=postgres_password
+            - PGPORT=5432
+
+    client:
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./client
+        volumes:
+# node_modules is not redirected back to local machine
+            - /app/node_modules
+# client directory the image is referenced back to local machine
+            - ./client:/app
+
+    worker:
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./worker
+        volumes:
+# node_modules is not redirected back to local machine
+            - /app/node_modules
+# worker image is referenced back to local machine
+            - ./worker:/app
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+                

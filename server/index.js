@@ -1,4 +1,6 @@
 const keys = require('./keys');
+const chalk = require('chalk');
+ 
 
 // express setup
 const express = require('express');
@@ -24,9 +26,14 @@ const pgClient = new Pool({
 pgClient.on('error', () => console.log('lost postgress connection'));
 // this is the table that will store fib indexes we have already seen
 // a table called 'values' with one column in it
-pgClient
-    .query('CREATE TABLE IF NOT EXISTS values (number INT)')
-    .catch(err => console.log(err));
+pgClient.on('connect', () => {
+    console.log(chalk.green('* * * * * * * Connected to Postgres.... * * * * *'));
+
+    pgClient
+        .query('CREATE TABLE IF NOT EXISTS values (number INT)')
+        .catch(err => console.log(err));    
+});
+
 
 // redis setup
 const redis = require('redis');
@@ -39,6 +46,10 @@ const redisPublisher = redisClient.duplicate();
 
 
 // express route handlers
+/**
+ * * notice that there is no leading /api here even though
+ * * thats how client makes the requests -- with a leading api
+ */
 app.get('/', (req, res) => {
     res.send('hi');
 });
@@ -82,5 +93,5 @@ app.post('/values', async (req, res) => {
 });
 
 app.listen(5000, err => {
-    console.log('listening ....');
+    console.log(chalk.green('* * * * * * *Express server listening .... * * * * * '));
 });
