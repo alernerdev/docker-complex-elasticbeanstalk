@@ -25,3 +25,15 @@ after_success:
     - docker push redridinghood/docker-complex-fib-nginx
     - docker push redridinghood/docker-complex-fib-worker
     - docker push redridinghood/docker-complex-fib-server
+
+deploy:
+    provider: elasticbeanstalk
+    region: us-east-1
+    app: docker-complex-fib
+    env: DockerComplexFib-env-1
+    bucket_name: elasticbeanstalk-us-east-1-538911721305
+    bucket_path: docker-complex-fib
+    on:
+        branch: master
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
