@@ -22,6 +22,8 @@ services:
 
 # thats my code
     api:
+# adding this to enable chalk to produce color output.  Seems to be docker-compose bug
+        tty: true
         depends_on: 
             - postgres
         build:
@@ -43,6 +45,7 @@ services:
             - PGPORT=5432
 
     client:
+        stdin_open: true
         build:
             dockerfile: Dockerfile.dev
             context: ./client

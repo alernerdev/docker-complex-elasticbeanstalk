@@ -1,0 +1,38 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "containerDefinitions": [
+        {
+            "name":"client",
+            "image":"redridinghood/docker-complex-fib-client",
+            "hostname" : "client",
+            "essential":false
+        },
+        {
+            "name":"server",
+            "image":"redridinghood/docker-complex-fib-server",
+            "hostname" : "api",
+            "essential":false
+        },
+        {
+            "name":"nginx",
+            "image":"redridinghood/docker-complex-fib-nginx",
+            "hostname" : "nginx",
+            "essential":true,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 80
+                }
+            ],
+            "Links": [
+                "client", "server"
+            ]
+        },
+        {
+            "name":"worker",
+            "image":"redridinghood/docker-complex-fib-worker",
+            "hostname":"worker",
+            "essential":false
+        }            
+    ]
+}
